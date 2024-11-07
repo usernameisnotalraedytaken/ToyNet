@@ -5,5 +5,7 @@ ToyNet 是一个简易的多层感知器（MLP）神经网络实现，运行在M
 
 ## Build
 ``` make ```
+
 然后运行`toyNet`，注意需要先解压dataset.zip，再将里面的两个文件放到和`toyNet`相同的目录下面。
+
 如果你的机器支持avx512，也可以使用-maxv512f。实测Clang的效果好于gcc。
