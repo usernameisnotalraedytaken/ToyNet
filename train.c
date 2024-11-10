@@ -77,51 +77,42 @@ void ReadAndQuery(NeuralNetwork *nn, int len)
     printf("Correct = %d/%d\n", correct, len);
 }
 
-void QueryOneItem(NeuralNetwork *nn)
+void OutputWeights(NeuralNetwork *nn)
 {
-    freopen("data.csv", "r", stdin);
-    int correct = 0;
-    Matrix v = {0, 0, NULL}, w = {0, 0, NULL};
-    Fill(&v, 1, 784, 0);
-    Fill(&w, 10, 1, 0);
-    printf("Start to query one item:\n");
-    int target = read(&v);
-    Normalize(&v);
-    QueryNN(nn, v, &w);
-    Normalize(&w);
-    int max_index = 0;
-    printf("Possibilities:\n");
-    for(int j = 0; j < 10; ++j)
-        printf("%d     ", j);
-    puts("");
-    for(int j = 0; j < 10; ++j)
-    {
-        printf("%.03f ", w.data[j][0]);
-        if(w.data[j][0] >= w.data[max_index][0])
-            max_index = j;
-    }
-    freeMatrix(&v);
-    freeMatrix(&w);
-    printf("\nPrediction = %d\n", max_index);
+    freopen("weights1.txt", "w", stderr);
+    int rows = nn->Weight_in_to_hidden.row_size;
+    int cols = nn->Weight_in_to_hidden.col_size;
+    for(int i = 0; i < rows; ++i)
+        for(int j = 0; j < cols; ++j)
+            fprintf(stderr, "%f\n", nn->Weight_in_to_hidden.data[i][j]);
+    freopen("weights2.txt", "w", stderr);
+    rows = nn->Weight_hidden_to_out.row_size;
+    cols = nn->Weight_hidden_to_out.col_size;
+    for(int i = 0; i < rows; ++i)
+        for(int j = 0; j < cols; ++j)
+            fprintf(stderr, "%f\n", nn->Weight_hidden_to_out.data[i][j]);
+    printf("Weights outputted to files.\n");
+    fclose(stderr);
 }
 
 int main()
 {
     clock_t start, end;
     start = clock();
-    printf("MNIST MLP Classifier, optimized version.\n");
+    printf("MNIST MLP Classifier Training Session, optimized version.\n");
     float rate = 0.10;
     printf("rate = %f\n\n", rate);
     srand(time(NULL));
-    NeuralNetwork nn = InitNN(784, 204, 10, rate);
+    NeuralNetwork nn = InitNN(784, 256, 10, rate);
     printf("`nn` initialized.\n");
+    printf("Network size: %d input, %d hidden, %d output.\n", nn.innodes, nn.hidenodes, nn.outnodes);
     Read(&nn, 60000);
     start = clock();
-    for(int i = 0; i < 5; i++, rate *= 0.95, printf("Generation %d\n", i))
+    for(int i = 0; i < 1; i++, rate *= 0.9, printf("Generation %d\n", i))
         Train(&nn, 60000);
     puts("Training finished.");
     ReadAndQuery(&nn, 10000);
-    QueryOneItem(&nn);
+    OutputWeights(&nn);
     freeNN(&nn);
     end = clock();
     double elapsed_secs = (end - start) * 1.0 / CLOCKS_PER_SEC;
