@@ -108,7 +108,7 @@ int main()
     printf("Network size: %d input, %d hidden, %d output.\n", nn.innodes, nn.hidenodes, nn.outnodes);
     Read(&nn, 60000);
     start = clock();
-    for(int i = 0; i < 1; i++, rate *= 0.9, printf("Generation %d\n", i))
+    for(int i = 0; i < 1; i++, rate *= 0.95, printf("Generation %d\n", i))
         Train(&nn, 60000);
     puts("Training finished.");
     ReadAndQuery(&nn, 10000);
