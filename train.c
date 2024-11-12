@@ -51,7 +51,7 @@ void Train(NeuralNetwork *nn, int len)
     //    TrainNN(nn, NoiseData[i], TrainTarget[i]);
     //nn->learnrate *= 0.97;
     for(int i = 0; i < len; ++i)
-        TrainNN(nn, TrainData[i], TrainTarget[i]);
+        TrainNN(nn, TrainData[i], TrainTarget[i], i);
 }
 
 void ReadAndQuery(NeuralNetwork *nn, int len)
@@ -103,12 +103,12 @@ int main()
     float rate = 0.10;
     printf("rate = %f\n\n", rate);
     srand(time(NULL));
-    NeuralNetwork nn = InitNN(784, 256, 10, rate);
+    NeuralNetwork nn = InitNN(784, 200, 10, rate);
     printf("`nn` initialized.\n");
     printf("Network size: %d input, %d hidden, %d output.\n", nn.innodes, nn.hidenodes, nn.outnodes);
     Read(&nn, 60000);
     start = clock();
-    for(int i = 0; i < 1; i++, rate *= 0.95, printf("Generation %d\n", i))
+    for(int i = 0; i < 3; i++, rate *= 0.95, printf("Generation %d\n", i))
         Train(&nn, 60000);
     puts("Training finished.");
     ReadAndQuery(&nn, 10000);

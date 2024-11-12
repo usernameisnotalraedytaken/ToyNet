@@ -1,3 +1,7 @@
+#define _GNU_SOURCE
+#define MULTI_THREAD_ENABLED 0
+#include <sched.h>
+#include <pthread.h>
 #include "neuralnetwork.h"
 
 NeuralNetwork InitNN(int innodes, int hidenodes, int outnodes, real learnrate)
@@ -14,7 +18,7 @@ NeuralNetwork InitNN(int innodes, int hidenodes, int outnodes, real learnrate)
     return nn;
 }
 
-void TrainNN(NeuralNetwork *nn, Matrix input, Matrix target)
+void TrainNN(NeuralNetwork *nn, Matrix input, Matrix target, int n)
 {
     Matrix hidden = {0, 0, NULL}, output = {0, 0, NULL}, output_errors = {0, 0, NULL}, hidden_errors = {0, 0, NULL};
     Matrix inputs = {0, 0, NULL};
@@ -29,8 +33,30 @@ void TrainNN(NeuralNetwork *nn, Matrix input, Matrix target)
     Matrix tr = {0, 0, NULL};
     tr = Tr(nn->Weight_hidden_to_out);
     Mul(tr, output_errors, &hidden_errors);
+    #if MULTI_THREAD_ENABLED
+    ErrorFeedbackCorrectionArgs arg1 = {&nn->Weight_hidden_to_out, output_errors, output, hidden, nn->learnrate};
+    ErrorFeedbackCorrectionArgs arg2 = {&nn->Weight_in_to_hidden, hidden_errors, hidden, inputs, nn->learnrate};
+    pthread_t thread1, thread2;
+    cpu_set_t cpuset1, cpuset2;
+    CPU_ZERO(&cpuset1);
+    CPU_ZERO(&cpuset2);
+    CPU_SET(n % 8, &cpuset1);
+    CPU_SET((n + 1) % 8, &cpuset2);
+    pthread_create(&thread1, NULL, ErrorFeedbackCorrectionThread, &arg1);
+    pthread_create(&thread2, NULL, ErrorFeedbackCorrectionThread, &arg2);
+    pthread_setaffinity_np(thread1, sizeof(cpu_set_t), &cpuset1);
+    pthread_setaffinity_np(thread2, sizeof(cpu_set_t), &cpuset2);
+    #endif
+    //ErrorFeedbackCorrectionThread(&arg1);
+    //ErrorFeedbackCorrectionThread(&arg2);
+    #if MULTI_THREAD_ENABLED
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
+    #endif
+    #if !(MULTI_THREAD_ENABLED)
     ErrorFeedbackCorrection(&nn->Weight_hidden_to_out, output_errors, output, hidden, nn->learnrate);
     ErrorFeedbackCorrection(&nn->Weight_in_to_hidden, hidden_errors, hidden, inputs, nn->learnrate);
+    #endif
     freeMatrix(&hidden);
     freeMatrix(&output);
     freeMatrix(&inputs);

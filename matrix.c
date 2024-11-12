@@ -205,6 +205,7 @@ void Mul(Matrix a, Matrix b, Matrix *c)
     int m = a.row_size;
     int n = a.col_size;
     int p = b.col_size;
+    int block_size = 4;
     if(n != b.row_size)
     {
         printf("!Error: trying to multiply two matrices with not matching sizes.\n");
@@ -228,6 +229,12 @@ Matrix Tr(Matrix a)
         for (int j = 0; j < a.row_size; j++)
             b.data[i][j] = a.data[j][i];
     return b;
+}
+
+void ErrorFeedbackCorrectionThread(void *ptr)
+{
+    ErrorFeedbackCorrectionArgs *p = (ErrorFeedbackCorrectionArgs *)ptr;
+    ErrorFeedbackCorrection(p->node, p->error, p->lastoutput, p->nextoutput, p->learnrate);
 }
 
 void ErrorFeedbackCorrection(Matrix *node, Matrix error, Matrix lastoutput, Matrix nextoutput, real learnrate)

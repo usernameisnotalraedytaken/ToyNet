@@ -7,7 +7,7 @@ matrix.o : matrix.c
 	gcc -c matrix.c -O3 -mavx2 -march=native -fexcess-precision=fast -ftree-vectorize -ftree-slp-vectorize -ftree-loop-if-convert -fvect-cost-model=dynamic -fsimd-cost-model=dynamic -o matrix.o
 
 nn.o : nn.c
-	gcc -c nn.c -O3 -mavx2 -march=native -fexcess-precision=fast -ftree-vectorize -ftree-slp-vectorize -ftree-loop-if-convert -fvect-cost-model=dynamic -fsimd-cost-model=dynamic -o nn.o
+	gcc -c nn.c -O3 -mavx2 -march=native -fexcess-precision=fast -ftree-vectorize -ftree-slp-vectorize -ftree-loop-if-convert -fvect-cost-model=dynamic -fsimd-cost-model=dynamic -lpthread -o nn.o
 
 train.o : train.c
 	gcc -c train.c -O3 -mavx2 -march=native -fexcess-precision=fast -ftree-vectorize -ftree-slp-vectorize -ftree-loop-if-convert -fvect-cost-model=dynamic -fsimd-cost-model=dynamic -o train.o
