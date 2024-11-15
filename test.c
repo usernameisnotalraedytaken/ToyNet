@@ -15,7 +15,7 @@ int read(Matrix *vec)
         char c = getchar();
         while(c>'9'||c<'0')c=getchar();
         while(c>='0'&&c<='9')u=u*10+c-'0',c=getchar();
-        vec->data[0][i] = u;
+        vec->data[i] = u;
     }
     return n;
 }
@@ -27,13 +27,13 @@ void InputWeights(NeuralNetwork *nn)
     int cols = nn->Weight_in_to_hidden.col_size;
     for(int i = 0; i < rows; ++i)
         for(int j = 0; j < cols; ++j)
-            scanf("%f", &(nn->Weight_in_to_hidden.data[i][j]));
+            scanf("%f", &(nn->Weight_in_to_hidden.data[i * cols + j]));
     freopen("weights2.txt", "r", stdin);
     rows = nn->Weight_hidden_to_out.row_size;
     cols = nn->Weight_hidden_to_out.col_size;
     for(int i = 0; i < rows; ++i)
         for(int j = 0; j < cols; ++j)
-            scanf("%f", &(nn->Weight_hidden_to_out.data[i][j]));
+            scanf("%f", &(nn->Weight_hidden_to_out.data[i * cols + j]));
     printf("Weights read from files.\n");
 }
 
@@ -56,8 +56,8 @@ void QueryOneItem(NeuralNetwork *nn)
     puts("");
     for(int j = 0; j < 10; ++j)
     {
-        printf("%.03f ", w.data[j][0]);
-        if(w.data[j][0] >= w.data[max_index][0])
+        printf("%.03f ", w.data[j * w.col_size]);
+        if(w.data[j * w.col_size] >= w.data[max_index * w.col_size])
             max_index = j;
     }
     freeMatrix(&v);
@@ -71,7 +71,7 @@ int main()
     start = clock();
     printf("MNIST MLP Classifier Test Session, optimized version.\n");
     srand(time(NULL));
-    NeuralNetwork nn = InitNN(784, 256, 10, 0.1);
+    NeuralNetwork nn = InitNN(784, 200, 10, 0.1);
     printf("`nn` initialized.\n");
     InputWeights(&nn);
     QueryOneItem(&nn);

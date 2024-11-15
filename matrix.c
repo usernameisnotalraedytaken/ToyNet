@@ -4,9 +4,9 @@ void Fill(Matrix *mat, int rows, int cols, real value)
 {
     if (mat->col_size == cols && mat->row_size == rows)
     {
-        for (int i = 0; i < rows; i++)
-            for (int j = 0; j < cols; j++)
-                mat->data[i][j] = value;
+        for (int i = 0; i < rows; ++i)
+            for (int j = 0; j < cols; ++j)
+                mat->data[i * mat->col_size + j] = value;
         return;
     }
     if (mat->col_size != 0 || mat->row_size != 0)
@@ -20,24 +20,15 @@ void Fill(Matrix *mat, int rows, int cols, real value)
     }
     mat->row_size = rows;
     mat->col_size = cols;
-    mat->data = (real **)malloc(rows * sizeof(real *));
+    mat->data = (real *)malloc(cols * rows * sizeof(real *));
     if (mat->data == NULL)
     {
         fprintf(stderr, "Memory allocation failed for matrix data.\n");
         exit(EXIT_FAILURE);
     }
-    for (int i = 0; i < rows; i++) {
-        mat->data[i] = (real *)malloc(cols * sizeof(real));
-        if (mat->data[i] == NULL) {
-            fprintf(stderr, "Memory allocation failed for row %d.\n", i);
-            for (int j = 0; j < i; j++)
-                free(mat->data[j]);
-            free(mat->data);
-            exit(EXIT_FAILURE);
-        }
-        for (int j = 0; j < cols; j++)
-            mat->data[i][j] = value;
-    }
+    for (int i = 0; i < rows; ++i)
+        for (int j = 0; j < cols; ++j)
+            mat->data[i * mat->col_size + j] = value;
 }
 
 void Print(Matrix *mat)
@@ -48,10 +39,10 @@ void Print(Matrix *mat)
         exit(EXIT_FAILURE);
     }
     puts("----------------------------------------");
-    for (int i = 0; i < mat->row_size; i++)
+    for (int i = 0; i < mat->row_size; ++i)
     {
-        for (int j = 0; j < mat->col_size; j++)
-            printf("%10.5f ", mat->data[i][j]);
+        for (int j = 0; j < mat->col_size; ++j)
+            printf("%10.5f ", mat->data[i * mat->col_size + j]);
         printf("\n");
     }
     puts("----------------------------------------\n");
@@ -59,19 +50,19 @@ void Print(Matrix *mat)
 
 void ReLU(Matrix *m)
 {
-    for (int i = 0; i < m->row_size; i++)
-        for (int j = 0; j < m->col_size; j++)
-            if(m->data[i][j] < 0)
-                m->data[i][j] = 0;
+    for (int i = 0; i < m->row_size; ++i)
+        for (int j = 0; j < m->col_size; ++j)
+            if(m->data[i * m->col_size + j] < 0)
+                m->data[i * m->col_size + j] = 0;
 }
 
 void Sigmoid(Matrix *m)
 {
     int row = m->row_size;
     int col = m->col_size;
-    for (int i = 0; i < row; i++)
-        for (int j = 0; j < col; j++)
-            m->data[i][j] = 1 / (1 + exp(-m->data[i][j]));
+    for (int i = 0; i < row; ++i)
+        for (int j = 0; j < col; ++j)
+            m->data[i * m->col_size + j] = 1 / (1 + exp(-m->data[i * m->col_size + j]));
 }
 
 void freeMatrix(Matrix *mat)
@@ -80,11 +71,6 @@ void freeMatrix(Matrix *mat)
     {
         printf("!Error: trying to free a NULL matrix.\n");
         exit(EXIT_FAILURE);
-    }
-    for (int i = 0; i < mat->row_size; i++)
-    {
-        free(mat->data[i]);
-        mat->data[i] = NULL;
     }
     free(mat->data);
     mat->data = NULL;
@@ -95,8 +81,8 @@ Matrix Id(int size)
 {
     Matrix m = {0, 0, NULL};
     Fill(&m, size, size, 0);
-    for (int i = 0; i < size; i++)
-        m.data[i][i] = 1;
+    for (int i = 0; i < size; ++i)
+        m.data[i * size + i] = 1;
     return m;
 }
 
@@ -109,9 +95,9 @@ void valMul(real val, Matrix *m)
     }
     int row = m->row_size;
     int col = m->col_size;
-    for (int i = 0; i < row; i++)
-        for (int j = 0; j < col; j++)
-            m->data[i][j] *= val;
+    for (int i = 0; i < row; ++i)
+        for (int j = 0; j < col; ++j)
+            m->data[i * col + j] *= val;
     //return m;
 }
 real normalDistributionRandom()
@@ -134,23 +120,23 @@ void Normalize(Matrix *m)
     real Min = 0, Max = 0;
     int row = m->row_size;
     int col = m->col_size;
-    for (int i = 0; i < row; i++)
-        for (int j = 0; j < col; j++)
+    for (int i = 0; i < row; ++i)
+        for (int j = 0; j < col; ++j)
         {
-            if(m->data[i][j] > Max)Max = m->data[i][j];
-            if(m->data[i][j] < Min)Min = m->data[i][j];
+            if(m->data[i * col + j] > Max)Max = m->data[i * col + j];
+            if(m->data[i * col + j] < Min)Min = m->data[i * col + j];
         }
-    for (int i = 0; i < row; i++)
-        for (int j = 0; j < col; j++)
-            m->data[i][j] = (m->data[i][j] - Min) / (Max - Min) * 0.99 + 0.01;
+    for (int i = 0; i < row; ++i)
+        for (int j = 0; j < col; ++j)
+            m->data[i * col + j] = (m->data[i * col + j] - Min) / (Max - Min) * 0.99 + 0.01;
 }
 Matrix XavierRand(int row, int col)
 {
     Matrix m = {0, 0, NULL};
     Fill(&m, row, col, 0);
-    for (int i = 0; i < row; i++)
-        for (int j = 0; j < col; j++)
-            m.data[i][j] = xavierNormalInit(row, col);
+    for (int i = 0; i < row; ++i)
+        for (int j = 0; j < col; ++j)
+            m.data[i * col + j] = xavierNormalInit(row, col);
     return m;
 }
 //Add two Matrixes(A + B) directly.
@@ -164,9 +150,9 @@ void Add(Matrix a, Matrix b, Matrix *c)
     //Fill(c, a.row_size, a.col_size, 0);
     int row = a.row_size;
     int col = a.col_size;
-    for (int i = 0; i < row; i++)
-        for(int j = 0; j < col; j++)
-            c->data[i][j] = a.data[i][j] + b.data[i][j];
+    for (int i = 0; i < row; ++i)
+        for(int j = 0; j < col; ++j)
+            c->data[i * col + j] = a.data[i * col + j] + b.data[i * col + j];
 }
 
 //Calculate Matrix a - b directly.
@@ -180,9 +166,9 @@ void Minus(Matrix a, Matrix b, Matrix *c)
     Fill(c, a.row_size, a.col_size, 0);
     int row = a.row_size;
     int col = a.col_size;
-    for (int i = 0; i < row; i++)
-        for(int j = 0; j < col; j++)
-            c->data[i][j] = a.data[i][j] - b.data[i][j];
+    for (int i = 0; i < row; ++i)
+        for(int j = 0; j < col; ++j)
+            c->data[i * col + j] = a.data[i * col + j] - b.data[i * col + j];
 }
 //Multiplication through a[i][j] * b[i][j]
 void Cross(Matrix a, Matrix b, Matrix *c)
@@ -195,9 +181,9 @@ void Cross(Matrix a, Matrix b, Matrix *c)
     Fill(c, a.row_size, a.col_size, 0);
     int row = a.row_size;
     int col = a.col_size;
-    for (int i = 0; i < row; i++)
-        for(int j = 0; j < col; j++)
-            c->data[i][j] = a.data[i][j] * b.data[i][j];
+    for (int i = 0; i < row; ++i)
+        for(int j = 0; j < col; ++j)
+            c->data[i * col + j] = a.data[i * col + j] * b.data[i * col + j];
 }
 
 void Mul(Matrix a, Matrix b, Matrix *c)
@@ -212,12 +198,12 @@ void Mul(Matrix a, Matrix b, Matrix *c)
         exit(EXIT_FAILURE);
     }
     Fill(c, m, p, 0);
-    for (int k = 0; k < n; k++)
-        for (int i = 0; i < m; i++)
+    for (int k = 0; k < n; ++k)
+        for (int i = 0; i < m; ++i)
         {
-            real val = a.data[i][k];
-            for (int j = 0; j < p; j++)
-                c->data[i][j] += val * b.data[k][j];
+            real val = a.data[i * n + k];
+            for (int j = 0; j < p; ++j)
+                c->data[i * p + j] += val * b.data[k * p + j];
         }
 }
 
@@ -225,9 +211,9 @@ Matrix Tr(Matrix a)
 {
     Matrix b = {0, 0, NULL};
     Fill(&b, a.col_size, a.row_size, 0);
-    for (int i = 0; i < a.col_size; i++)
-        for (int j = 0; j < a.row_size; j++)
-            b.data[i][j] = a.data[j][i];
+    for (int i = 0; i < a.col_size; ++i)
+        for (int j = 0; j < a.row_size; ++j)
+            b.data[i * a.row_size + j] = a.data[j * a.col_size + i];
     return b;
 }
 
@@ -269,6 +255,6 @@ Matrix addSpice(Matrix v, real rate)
     Fill(&r, v.row_size, v.col_size, 0);
     for(int i = 0; i < v.row_size; ++i)
         for(int j = 0; j < v.col_size; ++j)
-            r.data[i][j] = v.data[i][j] + rate * normalDistributionRandom();
+            r.data[i * v.col_size + j] = v.data[i * v.col_size + j] + rate * normalDistributionRandom();
     return r;
 }

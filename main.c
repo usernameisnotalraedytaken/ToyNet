@@ -15,7 +15,7 @@ int read(Matrix *vec)
         char c = getchar();
         while(c>'9'||c<'0')c=getchar();
         while(c>='0'&&c<='9')u=u*10+c-'0',c=getchar();
-        vec->data[0][i] = u;
+        vec->data[i] = u;
     }
     return n;
 }
@@ -36,7 +36,7 @@ void Read(NeuralNetwork *nn, int len)
         w.row_size = 1;
         w.col_size = 10;
         for(int j = 0; j < 10; ++j)
-            w.data[0][j] = j == n ? 0.99 : 0.01;
+            w.data[j] = j == n ? 0.99 : 0.01;
         TrainData[i] = v;
         //NoiseData[i] = v;
         //addSpice(v, 0.05);
@@ -51,7 +51,7 @@ void Train(NeuralNetwork *nn, int len)
     //    TrainNN(nn, NoiseData[i], TrainTarget[i]);
     //nn->learnrate *= 0.97;
     for(int i = 0; i < len; ++i)
-        TrainNN(nn, TrainData[i], TrainTarget[i]);
+        TrainNN(nn, TrainData[i], TrainTarget[i], i);
 }
 
 void ReadAndQuery(NeuralNetwork *nn, int len)
@@ -68,7 +68,7 @@ void ReadAndQuery(NeuralNetwork *nn, int len)
         QueryNN(nn, v, &w);
         int max_index = 0;
         for(int j = 0; j < 10; ++j)
-            if(w.data[j][0] >= w.data[max_index][0])
+            if(w.data[j * w.col_size] >= w.data[max_index * w.col_size])
                 max_index = j;
         correct += max_index == target ? 1 : 0;
         freeMatrix(&v);
@@ -96,8 +96,8 @@ void QueryOneItem(NeuralNetwork *nn)
     puts("");
     for(int j = 0; j < 10; ++j)
     {
-        printf("%.03f ", w.data[j][0]);
-        if(w.data[j][0] >= w.data[max_index][0])
+        printf("%.03f ", w.data[j * w.col_size]);
+        if(w.data[j * w.col_size] >= w.data[max_index * w.col_size])
             max_index = j;
     }
     freeMatrix(&v);

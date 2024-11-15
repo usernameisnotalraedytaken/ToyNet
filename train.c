@@ -15,7 +15,7 @@ int read(Matrix *vec)
         char c = getchar();
         while(c>'9'||c<'0')c=getchar();
         while(c>='0'&&c<='9')u=u*10+c-'0',c=getchar();
-        vec->data[0][i] = u;
+        vec->data[i] = u;
     }
     return n;
 }
@@ -36,7 +36,7 @@ void Read(NeuralNetwork *nn, int len)
         w.row_size = 1;
         w.col_size = 10;
         for(int j = 0; j < 10; ++j)
-            w.data[0][j] = j == n ? 0.99 : 0.01;
+            w.data[j] = j == n ? 0.99 : 0.01;
         TrainData[i] = v;
         //NoiseData[i] = v;
         //addSpice(v, 0.05);
@@ -68,7 +68,7 @@ void ReadAndQuery(NeuralNetwork *nn, int len)
         QueryNN(nn, v, &w);
         int max_index = 0;
         for(int j = 0; j < 10; ++j)
-            if(w.data[j][0] >= w.data[max_index][0])
+            if(w.data[j * w.col_size] >= w.data[max_index * w.col_size])
                 max_index = j;
         correct += max_index == target ? 1 : 0;
         freeMatrix(&v);
@@ -84,13 +84,13 @@ void OutputWeights(NeuralNetwork *nn)
     int cols = nn->Weight_in_to_hidden.col_size;
     for(int i = 0; i < rows; ++i)
         for(int j = 0; j < cols; ++j)
-            fprintf(stderr, "%f\n", nn->Weight_in_to_hidden.data[i][j]);
+            fprintf(stderr, "%f\n", nn->Weight_in_to_hidden.data[i * cols + j]);
     freopen("weights2.txt", "w", stderr);
     rows = nn->Weight_hidden_to_out.row_size;
     cols = nn->Weight_hidden_to_out.col_size;
     for(int i = 0; i < rows; ++i)
         for(int j = 0; j < cols; ++j)
-            fprintf(stderr, "%f\n", nn->Weight_hidden_to_out.data[i][j]);
+            fprintf(stderr, "%f\n", nn->Weight_hidden_to_out.data[i * cols + j]);
     printf("Weights outputted to files.\n");
     fclose(stderr);
 }
@@ -100,7 +100,7 @@ int main()
     clock_t start, end;
     start = clock();
     printf("MNIST MLP Classifier Training Session, optimized version.\n");
-    float rate = 0.10;
+    float rate = 0.1;
     printf("rate = %f\n\n", rate);
     srand(time(NULL));
     NeuralNetwork nn = InitNN(784, 200, 10, rate);
@@ -108,7 +108,7 @@ int main()
     printf("Network size: %d input, %d hidden, %d output.\n", nn.innodes, nn.hidenodes, nn.outnodes);
     Read(&nn, 60000);
     start = clock();
-    for(int i = 0; i < 3; i++, rate *= 0.95, printf("Generation %d\n", i))
+    for(int i = 0; i < 3; i++, rate *= 1, printf("Generation %d\n", i))
         Train(&nn, 60000);
     puts("Training finished.");
     ReadAndQuery(&nn, 10000);

@@ -6,7 +6,7 @@ typedef float real;
 typedef struct
 {
     int row_size, col_size;
-    real **data;
+    real *data;
 } Matrix;
 
 typedef struct
