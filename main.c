@@ -113,7 +113,7 @@ int main()
     float rate = 0.10;
     printf("rate = %f\n\n", rate);
     srand(time(NULL));
-    NeuralNetwork nn = InitNN(784, 204, 10, rate);
+    NeuralNetwork nn = InitNN(784, 200, 10, rate);
     printf("`nn` initialized.\n");
     Read(&nn, 60000);
     start = clock();
