@@ -4,7 +4,7 @@ toyNet : matrix.o nn.o main.o train.o test.o
 	gcc matrix.o nn.o test.o -lm -o toyNet_test.exe
 
 matrix.o : matrix.c
-	gcc -c matrix.c -Ofast -mavx2 -march=native -fexcess-precision=fast -ftree-vectorize -ftree-slp-vectorize -ftree-loop-if-convert -fvect-cost-model=dynamic -fsimd-cost-model=dynamic -o matrix.o
+	gcc -c matrix.c -Ofast -mavx2 -march=native -fexcess-precision=fast -ftree-vectorize -ftree-slp-vectorize -ftree-loop-if-convert -fvect-cost-model=dynamic -fsimd-cost-model=dynamic -ffast-math -o matrix.o
 
 nn.o : nn.c
 	gcc -c nn.c -Ofast -mavx2 -march=native -fexcess-precision=fast -ftree-vectorize -ftree-slp-vectorize -ftree-loop-if-convert -fvect-cost-model=dynamic -fsimd-cost-model=dynamic -lpthread -o nn.o

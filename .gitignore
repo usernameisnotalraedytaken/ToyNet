@@ -2,3 +2,5 @@
 *.out
 *.csv
 *.exe
+*.txt
+*.log

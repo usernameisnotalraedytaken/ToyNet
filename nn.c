@@ -40,10 +40,10 @@ void TrainNN(NeuralNetwork *nn, Matrix input, Matrix target, int n)
     cpu_set_t cpuset1, cpuset2;
     CPU_ZERO(&cpuset1);
     CPU_ZERO(&cpuset2);
-    CPU_SET(n % 8, &cpuset1);
-    CPU_SET((n + 1) % 8, &cpuset2);
-    pthread_create(&thread1, NULL, ErrorFeedbackCorrectionThread, &arg1);
-    pthread_create(&thread2, NULL, ErrorFeedbackCorrectionThread, &arg2);
+    CPU_SET(n % 2, &cpuset1);
+    CPU_SET((n) % 2, &cpuset2);
+    pthread_create(&thread1, NULL, (void*)ErrorFeedbackCorrectionThread, &arg1);
+    pthread_create(&thread2, NULL, (void*)ErrorFeedbackCorrectionThread, &arg2);
     pthread_setaffinity_np(thread1, sizeof(cpu_set_t), &cpuset1);
     pthread_setaffinity_np(thread2, sizeof(cpu_set_t), &cpuset2);
     #endif
