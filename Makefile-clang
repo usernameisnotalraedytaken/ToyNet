@@ -4,16 +4,16 @@ toyNet : matrix.o nn.o main.o train.o test.o
 	clang matrix.o nn.o test.o -lm -o toyNet_test.exe
 
 matrix.o : matrix.c
-	clang -c matrix.c -O3 -mavx2 -march=native -ftree-vectorize -ftree-slp-vectorize -o matrix.o
+	clang -c matrix.c -Ofast -mavx2 -march=native -ftree-vectorize -ftree-slp-vectorize -ffast-math -o matrix.o
 
 nn.o : nn.c
-	clang -c nn.c -O3 -mavx2 -march=native -ftree-vectorize -ftree-slp-vectorize -lpthread -o nn.o
+	clang -c nn.c -Ofast -mavx2 -march=native -ftree-vectorize -ftree-slp-vectorize -lpthread -o nn.o
 
 train.o : train.c
-	clang -c train.c -O3 -mavx2 -march=native -ftree-vectorize -ftree-slp-vectorize -o train.o
+	clang -c train.c -Ofast -mavx2 -march=native -ftree-vectorize -ftree-slp-vectorize -o train.o
 
 test.o : test.c
-	clang -c test.c -O3 -mavx2 -march=native -ftree-vectorize -ftree-slp-vectorize -o test.o
+	clang -c test.c -Ofast -mavx2 -march=native -ftree-vectorize -ftree-slp-vectorize -o test.o
 
 main.o : main.c
-	clang -c main.c -O3 -mavx2 -march=native -ftree-vectorize -ftree-slp-vectorize -o main.o
+	clang -c main.c -Ofast -mavx2 -march=native -ftree-vectorize -ftree-slp-vectorize -o main.o

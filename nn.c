@@ -34,6 +34,7 @@ void TrainNN(NeuralNetwork *nn, Matrix input, Matrix target, int n)
     tr = Tr(nn->Weight_hidden_to_out);
     Mul(tr, output_errors, &hidden_errors);
     #if MULTI_THREAD_ENABLED
+    #warning "Warning: Multithread support may not be comprehensive."
     ErrorFeedbackCorrectionArgs arg1 = {&nn->Weight_hidden_to_out, output_errors, output, hidden, nn->learnrate};
     ErrorFeedbackCorrectionArgs arg2 = {&nn->Weight_in_to_hidden, hidden_errors, hidden, inputs, nn->learnrate};
     pthread_t thread1, thread2;

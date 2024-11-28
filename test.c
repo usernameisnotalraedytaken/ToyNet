@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <time.h>
 #include "neuralnetwork.h"
 
@@ -23,12 +24,14 @@ int read(Matrix *vec)
 void InputWeights(NeuralNetwork *nn)
 {
     freopen("weights1.txt", "r", stdin);
+    scanf("%d%d", &nn->Weight_in_to_hidden.row_size, &nn->Weight_in_to_hidden.col_size);
     int rows = nn->Weight_in_to_hidden.row_size;
     int cols = nn->Weight_in_to_hidden.col_size;
     for(int i = 0; i < rows; ++i)
         for(int j = 0; j < cols; ++j)
             scanf("%f", &(nn->Weight_in_to_hidden.data[i * cols + j]));
     freopen("weights2.txt", "r", stdin);
+    scanf("%d%d", &nn->Weight_hidden_to_out.row_size, &nn->Weight_hidden_to_out.col_size);
     rows = nn->Weight_hidden_to_out.row_size;
     cols = nn->Weight_hidden_to_out.col_size;
     for(int i = 0; i < rows; ++i)
@@ -52,17 +55,26 @@ void QueryOneItem(NeuralNetwork *nn)
     int max_index = 0;
     printf("Possibilities:\n");
     for(int j = 0; j < 10; ++j)
-        printf("%d     ", j);
+        if(w.data[j * w.col_size] >= w.data[max_index * w.col_size])
+            max_index = j;
+    for(int j = 0; j < 10; ++j)
+    {
+        if(j == max_index)
+            printf("\033[1;92m%d     \033[0m", j);
+        else
+            printf("%d     ", j);
+    }
     puts("");
     for(int j = 0; j < 10; ++j)
     {
-        printf("%.03f ", w.data[j * w.col_size]);
-        if(w.data[j * w.col_size] >= w.data[max_index * w.col_size])
-            max_index = j;
+        if(j == max_index)
+            printf("\033[1;92m%.03f \033[0m", w.data[j * w.col_size]);
+        else
+            printf("%.03f ", w.data[j * w.col_size]);
     }
     freeMatrix(&v);
     freeMatrix(&w);
-    printf("\nPrediction = %d\n", max_index);
+    printf("\nPrediction = \033[1;92m%d\033[0m\n", max_index);
 }
 
 int main()

@@ -1,5 +1,6 @@
 #include "neuralnetwork.h"
 #include <stddef.h>
+#include <assert.h>
 #pragma ivdep
 #pragma omp simd
 #pragma vector always
@@ -14,19 +15,16 @@ void Fill(Matrix *mat, int rows, int cols, real value)
     }
     if (mat->col_size != 0 || mat->row_size != 0)
     {
-        printf("!Error: trying to fill a non-empty matrix with new size.\n");
-        printf("Original matrix size: %d x %d\n", mat->row_size, mat->col_size);
-        printf("New matrix size: %d x %d\n", rows, cols);
-        mat->col_size = cols;
-        mat->row_size = rows;
-        exit(EXIT_FAILURE);
+        LOG("Error: trying to fill a non-empty matrix with new size.");
+        assert(mat->col_size == 0);
+        assert(mat->row_size == 0);
     }
     mat->row_size = rows;
     mat->col_size = cols;
     mat->data = (real *)malloc(cols * rows * sizeof(real *));
     if (mat->data == NULL)
     {
-        fprintf(stderr, "Memory allocation failed for matrix data.\n");
+        LOG("Memory allocation failed for matrix data.");
         exit(EXIT_FAILURE);
     }
     for (size_t i = 0; i < rows * cols; ++i)
@@ -37,8 +35,9 @@ void Print(Matrix *mat)
 {
     if (mat->col_size == 0 || mat->row_size == 0)
     {
-        printf("!Error: trying to print a matrix with zero size.\n");
-        exit(EXIT_FAILURE);
+        LOG("!Error: trying to print a matrix with zero size.");
+        assert(mat->col_size == 0);
+        assert(mat->row_size == 0);
     }
     puts("----------------------------------------");
     for (int i = 0; i < mat->row_size; ++i)
@@ -70,8 +69,9 @@ void freeMatrix(Matrix *mat)
 {
     if (mat == NULL || mat->data == NULL)
     {
-        printf("!Error: trying to free a NULL matrix.\n");
-        exit(EXIT_FAILURE);
+        LOG("Error: trying to free a NULL matrix.");
+        assert(mat == NULL);
+        assert(mat->data == NULL);
     }
     free(mat->data);
     mat->data = NULL;
@@ -91,8 +91,9 @@ void valMul(real val, Matrix *m)
 {
     if (m->col_size == 0 || m->row_size == 0)
     {
-        printf("!Error: trying to multiply a matrix with zero size.\n");
-        exit(EXIT_FAILURE);
+        LOG("Error: trying to multiply a matrix with zero size.");
+        assert(m->col_size == 0);
+        assert(m->row_size == 0);
     }
     int row = m->row_size;
     int col = m->col_size;
@@ -141,8 +142,9 @@ void Add(Matrix a, Matrix b, Matrix *c)
 {
     if((a.row_size != b.row_size) || (a.col_size != b.col_size))
     {
-        printf("!Error: trying to add two matrices with different sizes.\n");
-        exit(EXIT_FAILURE);
+        LOG("Error: trying to add two matrices with different sizes.");
+        assert(!(a.row_size - b.row_size));
+        assert(!(a.col_size - b.col_size));
     }
     //Fill(c, a.row_size, a.col_size, 0);
     int row = a.row_size;
@@ -156,8 +158,9 @@ void Minus(Matrix a, Matrix b, Matrix *c)
 {
     if((a.row_size != b.row_size) || (a.col_size != b.col_size))
     {
-        printf("!Error: trying to minus two matrices with different sizes.\n");
-        exit(EXIT_FAILURE);
+        LOG("Error: trying to minus two matrices with different sizes.");
+        assert(!(a.row_size - b.row_size));
+        assert(!(a.col_size - b.col_size));
     }
     Fill(c, a.row_size, a.col_size, 0);
     int row = a.row_size;
@@ -170,8 +173,9 @@ void Cross(Matrix a, Matrix b, Matrix *c)
 {
     if((a.row_size != b.row_size) || (a.col_size != b.col_size))
     {
-        printf("!Error: trying to cross two matrices with different sizes.\n");
-        exit(EXIT_FAILURE);
+        LOG("!Error: trying to cross two matrices with different sizes.");
+        assert(!(a.row_size - b.row_size));
+        assert(!(a.col_size - b.col_size));
     }
     Fill(c, a.row_size, a.col_size, 0);
     int row = a.row_size;
@@ -185,11 +189,10 @@ void Mul(Matrix a, Matrix b, Matrix *c)
     int m = a.row_size;
     int n = a.col_size;
     int p = b.col_size;
-    int block_size = 4;
     if(n != b.row_size)
     {
-        printf("!Error: trying to multiply two matrices with not matching sizes.\n");
-        exit(EXIT_FAILURE);
+        LOG("Error: trying to multiply two matrices with not matching sizes.");
+        assert(!(n - b.row_size));
     }
     Fill(c, m, p, 0);
     for (size_t k = 0; k < n; ++k)

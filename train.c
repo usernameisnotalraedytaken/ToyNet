@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <time.h>
 #include "neuralnetwork.h"
 
@@ -79,36 +80,69 @@ void ReadAndQuery(NeuralNetwork *nn, int len)
 
 void OutputWeights(NeuralNetwork *nn)
 {
-    freopen("weights1.txt", "w", stderr);
+    FILE *fp = fopen("weights1.txt", "w");
+    freopen("weights1.txt", "w", fp);
     int rows = nn->Weight_in_to_hidden.row_size;
     int cols = nn->Weight_in_to_hidden.col_size;
+    fprintf(fp, "%d\n%d\n", rows, cols);
     for(int i = 0; i < rows; ++i)
         for(int j = 0; j < cols; ++j)
-            fprintf(stderr, "%f\n", nn->Weight_in_to_hidden.data[i * cols + j]);
-    freopen("weights2.txt", "w", stderr);
+            fprintf(fp, "%f\n", nn->Weight_in_to_hidden.data[i * cols + j]);
+    fclose(fp);
+    FILE *fp2 = fopen("weights2.txt", "w");
+    freopen("weights2.txt", "w", fp2);
     rows = nn->Weight_hidden_to_out.row_size;
     cols = nn->Weight_hidden_to_out.col_size;
+    fprintf(fp2, "%d\n%d\n", rows, cols);
     for(int i = 0; i < rows; ++i)
         for(int j = 0; j < cols; ++j)
-            fprintf(stderr, "%f\n", nn->Weight_hidden_to_out.data[i * cols + j]);
-    printf("Weights outputted to files.\n");
-    fclose(stderr);
+            fprintf(fp2, "%f\n", nn->Weight_hidden_to_out.data[i * cols + j]);
+    printf("Weights successfully outputted to files.\n");
+    fclose(fp2);
 }
 
-int main()
+int main(int argc, char **argv)
 {
+    printf("Using C Standard : %ld\n", __STDC_VERSION__);
     clock_t start, end;
     start = clock();
     printf("MNIST MLP Classifier Training Session, optimized version.\n");
     float rate = 0.1;
+    int round = 1;
     printf("rate = %f\n\n", rate);
     srand(time(NULL));
-    NeuralNetwork nn = InitNN(784, 200, 10, rate);
+    NeuralNetwork nn;
+    if(argc == 1)
+    {
+        LOG("No argument provided, using default values.");
+        LOG("Initializing neural network with 784 input, 200 hidden, 10 output nodes, and learning rate of 0.1.");
+        nn = InitNN(784, 200, 10, rate);
+    }
+    else if(argc == 3)
+    {
+        LOG("No learning rate provided, using default value of 0.1.");
+        nn = InitNN(784, atoi(argv[1]), 10, rate);
+    }
+    else if(argc == 4)
+    {
+        nn = InitNN(784, atoi(argv[1]), 10, atof(argv[2]));
+        round = atoi(argv[3]);
+    }
+    else if (argc > 4)
+    {
+        LOG("Too many arguments provided, using default values.");
+        LOG("Initializing neural network with 784 input, 200 hidden, 10 output nodes, and learning rate of 0.1.");
+        nn = InitNN(784, 200, 10, rate);
+    }
+    else
+        nn = InitNN(784, atoi(argv[1]), 10, atof(argv[2]));
     printf("`nn` initialized.\n");
     printf("Network size: %d input, %d hidden, %d output.\n", nn.innodes, nn.hidenodes, nn.outnodes);
     Read(&nn, 60000);
+    printf("Learning rate: %f\n", nn.learnrate);
+    printf("Training for %d rounds.\n", round);
     start = clock();
-    for(int i = 0; i < 3; i++, rate *= 1, printf("Generation %d\n", i))
+    for(int i = 0; i < round; i++, rate *= 1, printf("Generation %d\n", i))
         Train(&nn, 60000);
     puts("Training finished.");
     ReadAndQuery(&nn, 10000);

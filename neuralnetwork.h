@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
+#define LOG(...) fprintf(stderr, "%s: Ln %d: %s\n", __FILE__, __LINE__, __VA_ARGS__)
+
 #define M_PI 3.14159265358979323846
 typedef float real;
 typedef struct
